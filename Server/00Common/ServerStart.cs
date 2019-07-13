@@ -14,7 +14,7 @@ class ServerStart
 
         while (true)
         {
-
+            ServerRoot.Instance.Update();
         }
     }
 }

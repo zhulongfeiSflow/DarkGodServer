@@ -10,3 +10,15 @@ D:\Dragonfly\Documents\C#Projects\Server\Server\bin\Debug\PESocket.dll
 D:\Dragonfly\Documents\C#Projects\Server\Server\bin\Debug\PEProtocol.pdb
 D:\Dragonfly\Documents\C#Projects\Server\Server\bin\Debug\PESocket.pdb
 D:\Dragonfly\Documents\C#Projects\Server\Server\obj\Debug\Server.csproj.CopyComplete
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\Server.exe.config
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\Server.exe
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\Server.pdb
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\PEProtocol.dll
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\PESocket.dll
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\PEProtocol.pdb
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\obj\Debug\Server.csprojAssemblyReference.cache
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\obj\Debug\Server.csproj.CopyComplete
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\obj\Debug\Server.exe
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\obj\Debug\Server.pdb
+D:\Dragonfly\Documents\C#Projects\DarkGodServer\Server\bin\Debug\MySql.Data.dll
