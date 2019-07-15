@@ -67,8 +67,9 @@ class DBMgr
                         apdef = reader.GetInt32("apdef"),
                         dodge = reader.GetInt32("dodge"),
                         pierce = reader.GetInt32("pierce"),
-                        critical = reader.GetInt32("critical")
+                        critical = reader.GetInt32("critical"),
 
+                        guideid = reader.GetInt32("guideid"),
                         //TODO
                     };
                 }
@@ -107,6 +108,7 @@ class DBMgr
                     pierce = 5,
                     critical = 2,
 
+                    guideid = 1001,
                     //TODO
                 };
 
@@ -126,7 +128,7 @@ class DBMgr
         int id = -1;
         try
         {
-            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical", conn);
+            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid", conn);
 
             cmd.Parameters.AddWithValue("acct", acct);
             cmd.Parameters.AddWithValue("pass", pass);
@@ -145,6 +147,7 @@ class DBMgr
             cmd.Parameters.AddWithValue("dodge", pd.dodge);
             cmd.Parameters.AddWithValue("pierce", pd.pierce);
             cmd.Parameters.AddWithValue("critical", pd.critical);
+            cmd.Parameters.AddWithValue("guideid", pd.guideid);
 
             //TODO
             cmd.ExecuteNonQuery();
@@ -194,7 +197,7 @@ class DBMgr
         try
         {
             MySqlCommand cmd = new MySqlCommand(
-            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical where id =@id", conn);
+            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid where id =@id", conn);
             cmd.Parameters.AddWithValue("id", id);
             cmd.Parameters.AddWithValue("name", playerData.name);
             cmd.Parameters.AddWithValue("level", playerData.lv);
@@ -206,10 +209,13 @@ class DBMgr
             cmd.Parameters.AddWithValue("hp", playerData.hp);
             cmd.Parameters.AddWithValue("ad", playerData.ad);
             cmd.Parameters.AddWithValue("ap", playerData.ap);
+            cmd.Parameters.AddWithValue("addef", playerData.addef);
             cmd.Parameters.AddWithValue("apdef", playerData.apdef);
             cmd.Parameters.AddWithValue("dodge", playerData.dodge);
             cmd.Parameters.AddWithValue("pierce", playerData.pierce);
             cmd.Parameters.AddWithValue("critical", playerData.critical);
+
+            cmd.Parameters.AddWithValue("guideid", playerData.guideid);
 
             //TOADD Others
             cmd.ExecuteNonQuery();
