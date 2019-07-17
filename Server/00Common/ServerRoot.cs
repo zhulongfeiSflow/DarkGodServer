@@ -25,11 +25,15 @@ public class ServerRoot
         DBMgr.Instance.Init();
 
         //服务层
+        CfgSvc.Instance.Init();
         CacheSvc.Instance.Init();
         NetSvc.Instance.Init();
 
         //业务系统层
         LoginSys.Instance.Init();
+        GuideSys.Instance.Init();
+        StrongSys.Instance.Init();
+
     }
 
     public void Update()

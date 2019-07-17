@@ -59,6 +59,7 @@ class DBMgr
                         power = reader.GetInt32("power"),
                         coin = reader.GetInt32("coin"),
                         diamond = reader.GetInt32("diamond"),
+                        crystal = reader.GetInt32("crystal"),
 
                         hp = reader.GetInt32("hp"),
                         ad = reader.GetInt32("ad"),
@@ -70,8 +71,34 @@ class DBMgr
                         critical = reader.GetInt32("critical"),
 
                         guideid = reader.GetInt32("guideid"),
-                        //TODO
+
+                        //TOADD
                     };
+
+                    #region 强化升级
+                    //数据示意：1#2#3#4#5#6
+                    string[] strongStrArr = reader.GetString("strong").Split('#');
+
+                    int[] _strongArr = new int[6];
+                    for (int i = 0; i < strongStrArr.Length; i++)
+                    {
+                        if (strongStrArr[i] == "")
+                        {
+                            continue;
+                        }
+                        if (int.TryParse(strongStrArr[i], out int startlv))
+                        {
+                            _strongArr[i] = startlv;
+                        }
+                        else
+                        {
+                            PECommon.Log("Parse Strong Data Error.", LogType.Error);
+                        }
+                    }
+                    playerData.strongArr = _strongArr;
+                    #endregion
+
+                    //TODO
                 }
             }
         }
@@ -98,6 +125,7 @@ class DBMgr
                     power = 150,
                     coin = 5000,
                     diamond = 500,
+                    crystal = 500,
 
                     hp = 2000,
                     ad = 275,
@@ -109,7 +137,8 @@ class DBMgr
                     critical = 2,
 
                     guideid = 1001,
-                    //TODO
+                    strongArr = new int[6],
+                    //TOADD
                 };
 
                 playerData.id = InsertNewAcctData(acct, pass, playerData);
@@ -128,7 +157,7 @@ class DBMgr
         int id = -1;
         try
         {
-            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid", conn);
+            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong", conn);
 
             cmd.Parameters.AddWithValue("acct", acct);
             cmd.Parameters.AddWithValue("pass", pass);
@@ -138,6 +167,7 @@ class DBMgr
             cmd.Parameters.AddWithValue("power", pd.power);
             cmd.Parameters.AddWithValue("coin", pd.coin);
             cmd.Parameters.AddWithValue("diamond", pd.diamond);
+            cmd.Parameters.AddWithValue("crystal", pd.crystal);
 
             cmd.Parameters.AddWithValue("hp", pd.hp);
             cmd.Parameters.AddWithValue("ad", pd.ad);
@@ -147,7 +177,10 @@ class DBMgr
             cmd.Parameters.AddWithValue("dodge", pd.dodge);
             cmd.Parameters.AddWithValue("pierce", pd.pierce);
             cmd.Parameters.AddWithValue("critical", pd.critical);
+
             cmd.Parameters.AddWithValue("guideid", pd.guideid);
+
+            cmd.Parameters.AddWithValue("strong", string.Join("#", pd.strongArr));
 
             //TODO
             cmd.ExecuteNonQuery();
@@ -192,30 +225,33 @@ class DBMgr
         return exist;
     }
 
-    public bool UpdatePlayerData(int id, PlayerData playerData)
+    public bool UpdatePlayerData(int id, PlayerData pd)
     {
         try
         {
             MySqlCommand cmd = new MySqlCommand(
-            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond"+ ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid where id =@id", conn);
+            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong where id =@id", conn);
             cmd.Parameters.AddWithValue("id", id);
-            cmd.Parameters.AddWithValue("name", playerData.name);
-            cmd.Parameters.AddWithValue("level", playerData.lv);
-            cmd.Parameters.AddWithValue("exp", playerData.exp);
-            cmd.Parameters.AddWithValue("power", playerData.power);
-            cmd.Parameters.AddWithValue("coin", playerData.coin);
-            cmd.Parameters.AddWithValue("diamond", playerData.diamond);
+            cmd.Parameters.AddWithValue("name", pd.name);
+            cmd.Parameters.AddWithValue("level", pd.lv);
+            cmd.Parameters.AddWithValue("exp", pd.exp);
+            cmd.Parameters.AddWithValue("power", pd.power);
+            cmd.Parameters.AddWithValue("coin", pd.coin);
+            cmd.Parameters.AddWithValue("diamond", pd.diamond);
+            cmd.Parameters.AddWithValue("crystal", pd.crystal);
 
-            cmd.Parameters.AddWithValue("hp", playerData.hp);
-            cmd.Parameters.AddWithValue("ad", playerData.ad);
-            cmd.Parameters.AddWithValue("ap", playerData.ap);
-            cmd.Parameters.AddWithValue("addef", playerData.addef);
-            cmd.Parameters.AddWithValue("apdef", playerData.apdef);
-            cmd.Parameters.AddWithValue("dodge", playerData.dodge);
-            cmd.Parameters.AddWithValue("pierce", playerData.pierce);
-            cmd.Parameters.AddWithValue("critical", playerData.critical);
+            cmd.Parameters.AddWithValue("hp", pd.hp);
+            cmd.Parameters.AddWithValue("ad", pd.ad);
+            cmd.Parameters.AddWithValue("ap", pd.ap);
+            cmd.Parameters.AddWithValue("addef", pd.addef);
+            cmd.Parameters.AddWithValue("apdef", pd.apdef);
+            cmd.Parameters.AddWithValue("dodge", pd.dodge);
+            cmd.Parameters.AddWithValue("pierce", pd.pierce);
+            cmd.Parameters.AddWithValue("critical", pd.critical);
 
-            cmd.Parameters.AddWithValue("guideid", playerData.guideid);
+            cmd.Parameters.AddWithValue("guideid", pd.guideid);
+
+            cmd.Parameters.AddWithValue("strong", string.Join("#", pd.strongArr));
 
             //TOADD Others
             cmd.ExecuteNonQuery();

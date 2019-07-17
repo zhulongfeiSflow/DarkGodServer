@@ -40,7 +40,9 @@ public class NetSvc
     public void Init()
     {
         PESocket<ServerSession, GameMsg> server = new PESocket<ServerSession, GameMsg>();
-        server.StartAsServer(SrvCfg.srvIP, SrvCfg.srvPort);
+        //server.StartAsServer(SrvCfg.srvIP, SrvCfg.srvPort);
+        //server.StartAsServer("192.168.254.100", SrvCfg.srvPort);  //外网测试 
+        server.StartAsServer("192.168.254.100", 17888);             //内网测试
 
         PECommon.Log("NetSvc Init Done.");
     }
@@ -75,6 +77,12 @@ public class NetSvc
                 break;
             case CMD.ReqRename:
                 LoginSys.Instance.ReqRename(pack);
+                break;
+            case CMD.ReqGuide:
+                GuideSys.Instance.ReqGuide(pack);
+                break;
+            case CMD.ReqStrong:
+                StrongSys.Instance.ReqStrong(pack);
                 break;
         }
     }
