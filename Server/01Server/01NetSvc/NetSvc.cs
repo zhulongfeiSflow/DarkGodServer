@@ -6,6 +6,8 @@
 	功能：网络服务
 *****************************************************/
 
+//#define 使用外网
+
 using PENet;
 using PEProtocol;
 using System.Collections.Generic;
@@ -41,9 +43,11 @@ public class NetSvc
     {
         PESocket<ServerSession, GameMsg> server = new PESocket<ServerSession, GameMsg>();
         //server.StartAsServer(SrvCfg.srvIP, SrvCfg.srvPort);
-        //server.StartAsServer("192.168.254.100", SrvCfg.srvPort);  //外网测试 
-        server.StartAsServer("192.168.254.100", 17888);             //内网测试
-
+#if 使用外网
+        server.StartAsServer(SrvCfg.localIP, SrvCfg.innerPort2);    //外网测试 
+#else
+        server.StartAsServer(SrvCfg.localIP, SrvCfg.innerPort);     //内网测试
+#endif
         PECommon.Log("NetSvc Init Done.");
     }
 
@@ -83,6 +87,18 @@ public class NetSvc
                 break;
             case CMD.ReqStrong:
                 StrongSys.Instance.ReqStrong(pack);
+                break;
+            case CMD.SndChat:
+                ChatSys.Instance.SndChat(pack);
+                break;
+            case CMD.ReqBuy:
+                BuySys.Instance.ReqBuy(pack);
+                break;
+            case CMD.ReqTakeTaskReward:
+                TaskSys.Instance.ReqTakeTaskReward(pack);
+                break;
+            default:
+                PECommon.Log("该请求服务器不支持！" + ((CMD)pack.msg.cmd).ToString());
                 break;
         }
     }

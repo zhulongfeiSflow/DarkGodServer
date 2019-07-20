@@ -37,4 +37,26 @@ public class PECommon
     {
         return 100 * lv * lv;
     }
+
+    public static void CalcExp(PlayerData pd, int addExp) {
+        int curtLv = pd.lv;
+        int curtExp = pd.exp;
+        int addRestExp = addExp;
+        while (true) {
+            int upNeedExp = GetExpUpValByLv(curtLv) - curtExp;
+            if (addRestExp >= upNeedExp) {
+                curtLv += 1;
+                curtExp = 0;
+                addRestExp -= upNeedExp;
+            }
+            else {
+                pd.lv = curtLv;
+                pd.exp = curtExp + addRestExp;
+                break;
+            }
+        }
+    }
+
+    public const int PowerAddSpace = 5;//minutes
+    public const int PowerAddCount = 2;
 }

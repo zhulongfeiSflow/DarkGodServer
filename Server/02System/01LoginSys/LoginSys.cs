@@ -12,7 +12,6 @@ using PEProtocol;
 public class LoginSys
 {
     private static LoginSys instance = null;
-
     public static LoginSys Instance {
         get {
             if (instance == null)
@@ -23,10 +22,12 @@ public class LoginSys
         }
     }
     private CacheSvc cacheSvc = null;
+    private static TimerSvc timerSvc = null;
 
     public void Init()
     {
         cacheSvc = CacheSvc.Instance;
+        timerSvc = TimerSvc.Instance;
         PECommon.Log("LoginSys Init Done.");
     }
 
@@ -57,6 +58,30 @@ public class LoginSys
             }
             else
             {
+                #region 计算离线体力增长
+                int power = pd.power;
+                long now = timerSvc.GetNowTime();
+                long milliseconds = now - pd.time;
+                int addpower = (int)(milliseconds / (1000 * 60 * PECommon.PowerAddSpace)) * PECommon.PowerAddCount;
+                if (addpower > 0)
+                {
+                    int powerMax = PECommon.GetPowerLimit(pd.lv);
+                    if (pd.power < powerMax)
+                    {
+                        pd.power += addpower;
+                        if (pd.power > powerMax)
+                        {
+                            pd.power = powerMax;
+                        }
+                    }
+                }
+
+                if (power != pd.power)
+                {
+                    cacheSvc.UpdatePlayerData(pd.id, pd);
+                }
+                #endregion
+
                 msg.rspLogin = new RspLogin
                 {
                     playerData = pd
@@ -110,6 +135,16 @@ public class LoginSys
 
     public void ClearOffLineData(ServerSession session)
     {
-        cacheSvc.AcctOffLine(session);
+        //写入下线时间
+        PlayerData pd = cacheSvc.GetPlayerDataBySession(session);
+        if (pd != null)
+        {
+            pd.time = timerSvc.GetNowTime();
+            if (!cacheSvc.UpdatePlayerData(pd.id, pd))
+            {
+                PECommon.Log("Update offline time error", LogType.Error);
+            }
+            cacheSvc.AcctOffLine(session);
+        }
     }
 }

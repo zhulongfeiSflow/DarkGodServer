@@ -8,15 +8,14 @@
 
 using MySql.Data.MySqlClient;
 using PEProtocol;
+using System;
 
-class DBMgr
-{
+class DBMgr {
     private static DBMgr instance = null;
 
     public static DBMgr Instance {
         get {
-            if (instance == null)
-            {
+            if (instance == null) {
                 instance = new DBMgr();
             }
             return instance;
@@ -24,8 +23,7 @@ class DBMgr
     }
     private MySqlConnection conn;
 
-    public void Init()
-    {
+    public void Init() {
         conn = new MySqlConnection("server=localhost;User Id = root;password=;Database=darkgod;charset=utf8");
         conn.Open();
         PECommon.Log("DBMgr Init Done.");
@@ -33,25 +31,20 @@ class DBMgr
         //QueryPlayerData("qqq","asds");
     }
 
-    public PlayerData QueryPlayerData(string acct, string pass)
-    {
+    public PlayerData QueryPlayerData(string acct, string pass) {
         bool isNew = true;
         PlayerData playerData = null;
         MySqlDataReader reader = null;
-        try
-        {
+        try {
             MySqlCommand cmd = new MySqlCommand("select * from account where acct = @acct", conn);
             cmd.Parameters.AddWithValue("acct", acct);
             reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
+            if (reader.Read()) {
                 isNew = false;
                 string _pass = reader.GetString("pass");
-                if (_pass.Equals(pass))
-                {
+                if (_pass.Equals(pass)) {
                     //密码正确，返回玩家数据
-                    playerData = new PlayerData
-                    {
+                    playerData = new PlayerData {
                         id = reader.GetInt32("id"),
                         name = reader.GetString("name"),
                         lv = reader.GetInt32("level"),
@@ -71,6 +64,8 @@ class DBMgr
                         critical = reader.GetInt32("critical"),
 
                         guideid = reader.GetInt32("guideid"),
+                        time = reader.GetInt64("time"),
+                        fuben = reader.GetInt32("fuben"),
 
                         //TOADD
                     };
@@ -80,44 +75,53 @@ class DBMgr
                     string[] strongStrArr = reader.GetString("strong").Split('#');
 
                     int[] _strongArr = new int[6];
-                    for (int i = 0; i < strongStrArr.Length; i++)
-                    {
-                        if (strongStrArr[i] == "")
-                        {
+                    for (int i = 0; i < strongStrArr.Length; i++) {
+                        if (strongStrArr[i] == "") {
                             continue;
                         }
-                        if (int.TryParse(strongStrArr[i], out int startlv))
-                        {
+                        if (int.TryParse(strongStrArr[i], out int startlv)) {
                             _strongArr[i] = startlv;
                         }
-                        else
-                        {
+                        else {
                             PECommon.Log("Parse Strong Data Error.", LogType.Error);
                         }
                     }
                     playerData.strongArr = _strongArr;
                     #endregion
 
+                    #region 任务数据
+                    //示意数据： 1|1|0#2|1|0#3|1|0#3|1|0#4|1|0
+                    string[] taskStrArr = reader.GetString("task").Split('#');
+                    playerData.taskArr = new string[6];
+                    for (int i = 0; i < taskStrArr.Length; i++) {
+                        if (taskStrArr[i] == "") {
+                            continue;
+                        }
+                        else if (taskStrArr[i].Length >= 5) {
+                            playerData.taskArr[i] = taskStrArr[i];
+                        }
+                        else {
+                            throw new Exception("Task Analysis DataError!");
+                        }
+                    }
+                    #endregion
+
+
                     //TODO
                 }
             }
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             PECommon.Log("Query PlayerData By Acct&Pass Error:" + ex, LogType.Error);
         }
-        finally
-        {
-            if (reader != null)
-            {
+        finally {
+            if (reader != null) {
                 reader.Close();
             }
 
-            if (isNew)
-            {
+            if (isNew) {
                 //不存在账号数据，创建新的默认账号数据，并返回
-                playerData = new PlayerData
-                {
+                playerData = new PlayerData {
                     id = -1,
                     name = "",
                     lv = 1,
@@ -138,8 +142,18 @@ class DBMgr
 
                     guideid = 1001,
                     strongArr = new int[6],
+
+                    time = TimerSvc.Instance.GetNowTime(),
+                    taskArr = new string[6],
+                    fuben =10001,
                     //TOADD
                 };
+
+                //初始化任务奖励数据
+                //示意数据： 1|1|0#2|1|0#3|1|0#3|1|0#4|1|0
+                for (int i = 0; i < playerData.taskArr.Length; i++) {
+                    playerData.taskArr[i] = (i + 1) + "|0|0";
+                }
 
                 playerData.id = InsertNewAcctData(acct, pass, playerData);
             }
@@ -152,12 +166,10 @@ class DBMgr
     /// <summary>
     /// 插入一条新的玩家数据
     /// </summary>
-    private int InsertNewAcctData(string acct, string pass, PlayerData pd)
-    {
+    private int InsertNewAcctData(string acct, string pass, PlayerData pd) {
         int id = -1;
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong", conn);
+        try {
+            MySqlCommand cmd = new MySqlCommand("insert into account set acct=@acct,pass =@pass,name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong,time=@time,task=@task,fuben=@fuben", conn);
 
             cmd.Parameters.AddWithValue("acct", acct);
             cmd.Parameters.AddWithValue("pass", pass);
@@ -181,43 +193,39 @@ class DBMgr
             cmd.Parameters.AddWithValue("guideid", pd.guideid);
 
             cmd.Parameters.AddWithValue("strong", string.Join("#", pd.strongArr));
+            cmd.Parameters.AddWithValue("time", pd.time);
+            cmd.Parameters.AddWithValue("task", string.Join("#", pd.taskArr));
+            cmd.Parameters.AddWithValue("fuben", pd.fuben);
 
             //TODO
             cmd.ExecuteNonQuery();
 
             id = (int)cmd.LastInsertedId;
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             PECommon.Log("Insert PlayerData Error:" + ex, LogType.Error);
         }
 
         return id;
     }
 
-    public bool QueryNameData(string name)
-    {
+    public bool QueryNameData(string name) {
         bool exist = false;
         MySqlDataReader reader = null;
 
-        try
-        {
+        try {
             MySqlCommand cmd = new MySqlCommand("select * from account where name= @name", conn);
             cmd.Parameters.AddWithValue("name", name);
             reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
+            if (reader.Read()) {
                 exist = true;
             }
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             PECommon.Log("Query Name State Error:" + ex, LogType.Error);
         }
-        finally
-        {
-            if (reader != null)
-            {
+        finally {
+            if (reader != null) {
                 reader.Close();
             }
         }
@@ -225,12 +233,10 @@ class DBMgr
         return exist;
     }
 
-    public bool UpdatePlayerData(int id, PlayerData pd)
-    {
-        try
-        {
+    public bool UpdatePlayerData(int id, PlayerData pd) {
+        try {
             MySqlCommand cmd = new MySqlCommand(
-            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong where id =@id", conn);
+            "update account set name=@name,level=@level,exp=@exp,power=@power,coin=@coin,diamond=@diamond,crystal=@crystal" + ",hp=@hp,ad=@ad,ap=@ap,addef=@addef,apdef=@apdef,dodge=@dodge,pierce=@pierce,critical=@critical,guideid=@guideid,strong=@strong,time=@time,task=@task,fuben=@fuben where id =@id", conn);
             cmd.Parameters.AddWithValue("id", id);
             cmd.Parameters.AddWithValue("name", pd.name);
             cmd.Parameters.AddWithValue("level", pd.lv);
@@ -252,12 +258,14 @@ class DBMgr
             cmd.Parameters.AddWithValue("guideid", pd.guideid);
 
             cmd.Parameters.AddWithValue("strong", string.Join("#", pd.strongArr));
+            cmd.Parameters.AddWithValue("time", pd.time);
+            cmd.Parameters.AddWithValue("task", string.Join("#", pd.taskArr));
+            cmd.Parameters.AddWithValue("fuben", pd.fuben);
 
             //TOADD Others
             cmd.ExecuteNonQuery();
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             PECommon.Log("Updata PlayerData Error:" + ex, LogType.Error);
             return false;
         }

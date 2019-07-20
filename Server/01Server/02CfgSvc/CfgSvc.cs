@@ -28,34 +28,30 @@ public class CfgSvc
     {
         InitGuideCfg();
         InitStrongCfg();
+        InitTaskRewardDicCfg();
         PECommon.Log("CfgSvc Init Done.");
 
     }
 
     #region 自动引导配置
     private Dictionary<int, GuideCfg> guideDic = new Dictionary<int, GuideCfg>();
-    private void InitGuideCfg()
-    {
+    private void InitGuideCfg() {
         XmlDocument doc = new XmlDocument();
         doc.Load(@"D:\Dragonfly\Documents\Unity Projects\DarkGod\Assets\Resources\ResCfgs\guide.xml");
         XmlNodeList nodList = doc.SelectSingleNode("root").ChildNodes;
 
-        for (int i = 0; i < nodList.Count; i++)
-        {
+        for (int i = 0; i < nodList.Count; i++) {
             XmlElement ele = nodList[i] as XmlElement;
 
-            if (ele.GetAttributeNode("ID") == null)
-            {
+            if (ele.GetAttributeNode("ID") == null) {
                 continue;
             }
             int ID = Convert.ToInt32(ele.GetAttributeNode("ID").InnerText);
 
             GuideCfg agc = new GuideCfg() { ID = ID };
 
-            foreach (XmlElement e in nodList[i].ChildNodes)
-            {
-                switch (e.Name)
-                {
+            foreach (XmlElement e in nodList[i].ChildNodes) {
+                switch (e.Name) {
                     //case "npcID":
                     //    agc.npcID = int.Parse(e.InnerText);
                     //    break;
@@ -78,14 +74,63 @@ public class CfgSvc
         PECommon.Log("GuideCfg Init Done.");
     }
 
-    public GuideCfg GetGuideCfg(int id)
-    {
+    public GuideCfg GetGuideCfg(int id) {
         GuideCfg agc = null;
-        if (guideDic.TryGetValue(id, out agc))
-        {
+        if (guideDic.TryGetValue(id, out agc)) {
             return agc;
         }
         return null;
+    }
+    #endregion
+
+    #region 任务奖励配置
+    private Dictionary<int, TaskRewardCfg> taskRewardDic = new Dictionary<int, TaskRewardCfg>();
+    private void InitTaskRewardDicCfg()
+    {
+        XmlDocument doc = new XmlDocument();
+        doc.Load(@"D:\Dragonfly\Documents\Unity Projects\DarkGod\Assets\Resources\ResCfgs\taskreward.xml");
+        XmlNodeList nodList = doc.SelectSingleNode("root").ChildNodes;
+
+        for (int i = 0; i < nodList.Count; i++)
+        {
+            XmlElement ele = nodList[i] as XmlElement;
+
+            if (ele.GetAttributeNode("ID") == null)
+            {
+                continue;
+            }
+            int ID = Convert.ToInt32(ele.GetAttributeNode("ID").InnerText);
+
+            TaskRewardCfg agc = new TaskRewardCfg() { ID = ID };
+
+            foreach (XmlElement e in nodList[i].ChildNodes)
+            {
+                switch (e.Name)
+                {
+                    case "count":
+                        agc.count = int.Parse(e.InnerText);
+                        break;
+                    case "exp":
+                        agc.exp = int.Parse(e.InnerText);
+                        break;
+                    case "coin":
+                        agc.coin = int.Parse(e.InnerText);
+                        break;
+                }
+            }
+            taskRewardDic.Add(ID, agc);
+        }
+        PECommon.Log("TaskRewardCfg Init Done.");
+    }
+
+    public TaskRewardCfg GetTaskRewardCfg(int id)
+    {
+        TaskRewardCfg agc = null;
+        if (taskRewardDic.TryGetValue(id, out agc))
+        {
+            return agc;
+        }
+        return agc;
     }
     #endregion
 
@@ -170,7 +215,6 @@ public class CfgSvc
         }
         return sd;
     }
-
     #endregion
 }
 
@@ -194,6 +238,19 @@ public class GuideCfg : BaseData<GuideCfg>
     public int coin;
     public int exp;
 }
+
+public class TaskRewardCfg : BaseData<TaskRewardCfg> {
+    //public string taskName;
+    public int count;
+    public int exp;
+    public int coin;
+}
+
+public class TaskRewardData : BaseData<TaskRewardData> {
+    public int prgs;
+    public bool taked;
+}
+
 
 public class BaseData<T>
 {

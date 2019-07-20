@@ -8,14 +8,12 @@
 
 using PEProtocol;
 
-public class StrongSys
-{
+public class StrongSys {
     private static StrongSys instance = null;
 
     public static StrongSys Instance {
         get {
-            if (instance == null)
-            {
+            if (instance == null) {
                 instance = new StrongSys();
             }
             return instance;
@@ -23,18 +21,15 @@ public class StrongSys
     }
     private CacheSvc cacheSvc = null;
 
-    public void Init()
-    {
+    public void Init() {
         cacheSvc = CacheSvc.Instance;
         PECommon.Log("StrongSys Init Done.");
     }
 
-    public void ReqStrong(MsgPack pack)
-    {
+    public void ReqStrong(MsgPack pack) {
         ReqStrong data = pack.msg.reqStrong;
 
-        GameMsg msg = new GameMsg
-        {
+        GameMsg msg = new GameMsg {
             cmd = (int)CMD.RspStrong
         };
 
@@ -42,25 +37,27 @@ public class StrongSys
         int curtStartLv = pd.strongArr[data.pos];
         StrongCfg nextSd = CfgSvc.Instance.GetStrongCfg(data.pos, curtStartLv + 1);
 
+
+        PshTaskPrgs pshTaskPrgs = null;
         //条件判断
-        if (pd.lv < nextSd.minlv)
-        {
+        if (pd.lv < nextSd.minlv) {
             msg.err = (int)ErrorCode.LackLevel;
         }
-        else if (pd.coin < nextSd.coin)
-        {
+        else if (pd.coin < nextSd.coin) {
             msg.err = (int)ErrorCode.LackCoin;
         }
-        else if (pd.crystal < nextSd.crystal)
-        {
+        else if (pd.crystal < nextSd.crystal) {
             msg.err = (int)ErrorCode.LackCrystal;
         }
-        else
-        {
+        else {
+            //任务进度数据更新
+            pshTaskPrgs = TaskSys.Instance.GetPshTaskPrgs(pd, 3);
+
             //资源扣除
             pd.coin -= nextSd.coin;
             pd.crystal -= nextSd.crystal;
             pd.strongArr[data.pos] += 1;
+
             //增加属性
             pd.hp += nextSd.addhp;
             pd.ad += nextSd.addhurt;
@@ -70,14 +67,11 @@ public class StrongSys
         }
 
         //更新数据库
-        if (!cacheSvc.UpdatePlayerData(pd.id, pd))
-        {
+        if (!cacheSvc.UpdatePlayerData(pd.id, pd)) {
             msg.err = (int)ErrorCode.UpdateDBError;
         }
-        else
-        {
-            msg.rspStrong = new RspStrong
-            {
+        else {
+            msg.rspStrong = new RspStrong {
                 coin = pd.coin,
                 crystal = pd.crystal,
                 hp = pd.hp,
@@ -87,6 +81,9 @@ public class StrongSys
                 apdef = pd.apdef,
                 strongArr = pd.strongArr,
             };
+
+            //并包处理
+            msg.pshTaskPrgs = pshTaskPrgs;
 
             pack.session.SendMsg(msg);
         }

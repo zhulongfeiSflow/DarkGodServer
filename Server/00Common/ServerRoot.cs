@@ -28,17 +28,27 @@ public class ServerRoot
         CfgSvc.Instance.Init();
         CacheSvc.Instance.Init();
         NetSvc.Instance.Init();
+        TimerSvc.Instance.Init();
 
         //业务系统层
         LoginSys.Instance.Init();
         GuideSys.Instance.Init();
         StrongSys.Instance.Init();
+        ChatSys.Instance.Init();
+        BuySys.Instance.Init();
+        PowerSys.Instance.Init();
+        TaskSys.Instance.Init();
 
+        //TimerSvc.Instance.AddTimeTask((int tid) =>
+        //{
+        //    PECommon.Log("xxxxxxxxxxxxxxxxxx");
+        //}, 1000,PETimeUnit.Millisecond,0);
     }
 
     public void Update()
     {
         NetSvc.Instance.Update();
+        TimerSvc.Instance.Update();
     }
 
     private int SessionID = 0;
