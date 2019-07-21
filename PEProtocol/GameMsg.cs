@@ -37,6 +37,9 @@ namespace PEProtocol {
         public RspTakeTaskReward rspTakeTaskReward;
 
         public PshTaskPrgs pshTaskPrgs;
+
+        public ReqFBFight reqFBFight;
+        public RspFBFight rspFBFight;
     }
 
     #region 登录相关
@@ -158,6 +161,18 @@ namespace PEProtocol {
     }
     #endregion
 
+    #region 副本战斗相关
+    [Serializable]
+    public class ReqFBFight {
+        public int fbid;
+    }
+    [Serializable]
+    public class RspFBFight {
+        public int fbid;
+        public int power;
+    }
+    #endregion
+
     #region 任务奖励
     [Serializable]
     public class ReqTakeTaskReward {
@@ -191,6 +206,7 @@ namespace PEProtocol {
         LackCoin,
         LackCrystal,
         LackDiamond,
+        LackPower,
     }
 
     public enum CMD {
@@ -221,6 +237,9 @@ namespace PEProtocol {
         RspTakeTaskReward = 211,
 
         PshTaskPrgs = 212,
+
+        ReqFBFight = 301,
+        RspFBFight = 302,
     }
 
     public class SrvCfg {
