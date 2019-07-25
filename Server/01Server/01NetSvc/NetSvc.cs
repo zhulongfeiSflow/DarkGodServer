@@ -100,6 +100,9 @@ public class NetSvc
             case CMD.ReqFBFight:
                 FubenSys.Instance.ReqFBFight(pack);
                 break;
+            case CMD.ReqFBFightEnd:
+                FubenSys.Instance.ReqFBFightEnd(pack);
+                break;
             default:
                 PECommon.Log("该请求服务器不支持！" + ((CMD)pack.msg.cmd).ToString());
                 break;
